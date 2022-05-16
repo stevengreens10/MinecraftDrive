@@ -5,3 +5,4 @@
 modules.order
 *.cmd
 Module.symvers
+CMakeLists.txt

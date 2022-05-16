@@ -30,11 +30,29 @@ static int device_open(struct inode *device_file, struct file *instance) {
 //
 //  printk("Client started? Returned: %d\n", result);
 
+  struct sockaddr_un addr;
+
+  printk(KERN_INFO "Start client module.\n");
+
+  // create
+  int retval = sock_create_kern(&init_net, AF_UNIX, SOCK_STREAM, 0, &sock);
+  printk("Socket create ret val: %d\n", retval);
+
+  // connect
+  memset(&addr, 0, sizeof(addr));
+  addr.sun_family = AF_UNIX;
+  strcpy(addr.sun_path, SOCK_PATH);
+
+  retval = sock->ops->connect(sock, (struct sockaddr *)&addr, sizeof(addr) - 1, 0);
+  printk("Socket connect ret val: %d\n", retval);
+
+
   return 0;
 }
 
 static int device_close(struct inode *device_file, struct file *instance) {
   printk("Test device closed\n");
+  sock_release(sock);
   return 0;
 }
 
@@ -49,17 +67,14 @@ ssize_t device_read(struct file *instance, char *buffer, size_t bufLen, loff_t *
 
   struct mc_read_data *data = recvData();
 
-  printk("Read data: %s len: %d", data->data, data->len);
-
-  errors = copy_to_user(buffer, data->data, data->len);
-//  memcpy(buffer, data->data, data->len);
-  printk("Errors: %d", errors);
-  printk("user buf: %s\n len: %d", buffer, data->len);
+  if (copy_to_user(buffer, data->data, data->len)) {
+    return -EFAULT;
+  }
 
   *offset += data->len;
 
-  kfree(data->data);
-  kfree(data);
+//  kfree(data->data);
+//  kfree(data);
 
   return data->len;
 }
@@ -116,22 +131,6 @@ static int majorNum;
 static int __init test_init(void) {
   // 0 for dynamic allocation
   majorNum = register_chrdev(0,"test", &fops);
-
-  struct sockaddr_un addr;
-
-  printk(KERN_INFO "Start client module.\n");
-
-  // create
-  int retval = sock_create_kern(&init_net, AF_UNIX, SOCK_STREAM, 0, &sock);
-  printk("Socket create ret val: %d\n", retval);
-
-  // connect
-  memset(&addr, 0, sizeof(addr));
-  addr.sun_family = AF_UNIX;
-  strcpy(addr.sun_path, SOCK_PATH);
-
-  retval = sock->ops->connect(sock, (struct sockaddr *)&addr, sizeof(addr) - 1, 0);
-  printk("Socket connect ret val: %d\n", retval);
 
   printk("Test module has been loaded!\n");
   return majorNum >= 0 ? 0 : -1 ;
