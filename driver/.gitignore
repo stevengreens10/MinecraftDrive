@@ -1,4 +1,5 @@
 *.o
+*.mod.c
 *.ko
 *.mod
 modules.order
