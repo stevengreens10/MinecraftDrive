@@ -60,14 +60,17 @@ ssize_t device_read(struct file *instance, char *buffer, size_t bufLen, loff_t *
   int errors = 0;
 
   printk("Reading %d bytes at offset %d", bufLen, *offset);
-  char tmpBuf[30];
-  sprintf(tmpBuf, "READ %d:%d", *offset, bufLen);
-  int tmpLen = strlen(tmpBuf);
-  writeData(tmpBuf, tmpLen);
+  char cmdBuf[30];
+  int cmdLen = sprintf(cmdBuf, "READ %d:%d\n", *offset, bufLen);
+  writeData(cmdBuf, cmdLen);
 
   struct mc_read_data *data = recvData();
 
-  if (copy_to_user(buffer, data->data, data->len)) {
+  char stackBuf[data->len];
+
+  memcpy(stackBuf, data->data, data->len);
+
+  if (copy_to_user(buffer, stackBuf, data->len)) {
     return -EFAULT;
   }
 
@@ -85,8 +88,7 @@ ssize_t device_write(struct file *instance, const char __user *buffer, size_t bu
   int toWrite = bufLen > MAX_DATA ? MAX_DATA : bufLen;
   printk("Writing %d bytes at offset %d", toWrite, *offset);
 
-  sprintf(tmpBuf, "WRITE %d:%d\n", *offset, toWrite);
-  int cmdLen = strlen(tmpBuf);
+  int cmdLen = sprintf(tmpBuf, "WRITE %d:%d\n", *offset, toWrite);
   memcpy(tmpBuf+cmdLen, buffer, toWrite);
 
   writeData(tmpBuf, cmdLen + toWrite);
@@ -139,7 +141,7 @@ static int __init test_init(void) {
 static void __exit test_exit(void) {
   unregister_chrdev(majorNum, "test");
   // release socket
-  sock_release(sock);
+//  sock_release(sock);
   printk("Test module has been exited!\n");
 }
 
@@ -159,8 +161,6 @@ struct mc_read_data* recvData() {
   printk("Socket recvmsg ret val: %d\n", retval);
 
   read_length = retval;
-  // print str
-  printk(KERN_INFO "str: %.*s\n", read_length, str);
 
   struct mc_read_data *data = kzalloc(sizeof(struct mc_read_data), GFP_KERNEL);
   data->data = str;
