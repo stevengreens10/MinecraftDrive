@@ -1,9 +1,12 @@
-# Fabric Example Mod
+# Minecraft Drive
 
-## Setup
+## What?
 
-For setup instructions please see the [fabric wiki page](https://fabricmc.net/wiki/tutorial:setup) that relates to the IDE that you are using.
+This project allows you create a device driver that will store data in a Minecraft world with 1 block corresponding to each byte.
 
-## License
+## How?
 
-This template is available under the CC0 license. Feel free to learn from it and incorporate it in your own projects.
+When the modified MC client starts up, it binds to a Unix Domain socket and awaits commands. 
+Reading or writing to the device driver file will send commands to MC over the socket, causing the player to place or inspect corresponding blocks.
+
+The data is then sent back to the device driver and made available to the user as if they had written to or read from a normal file.
