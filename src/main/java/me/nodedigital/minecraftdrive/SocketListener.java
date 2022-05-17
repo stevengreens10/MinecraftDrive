@@ -60,23 +60,28 @@ public class SocketListener implements Runnable {
 
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(bytes)))) {
             String cmdLine = reader.readLine();
+            DriveInitializer.LOGGER.info("Command received {}", cmdLine);
+
             int spaceIdx = cmdLine.indexOf(' ');
             String cmdType = cmdLine.substring(0, spaceIdx);
+
+            String[] tokens = cmdLine.substring(spaceIdx + 1).split(":");
+            command.offset = Integer.parseInt(tokens[0]);
+            command.len = Integer.parseInt(tokens[1]);
+
             if (cmdType.equals("READ")) {
                 command.type = DriverCommand.CommandType.READ;
             } else if (cmdType.equals("WRITE")) {
                 command.type = DriverCommand.CommandType.WRITE;
-            } else {
-                throw new RuntimeException("Could not recognize driver command:" + cmdType);
-            }
-
-            if (command.type == DriverCommand.CommandType.WRITE) {
                 byte[] data = new byte[command.len];
                 for (int i = 0; i < data.length; i++) {
                     data[i] = (byte) reader.read();
                 }
                 command.data = data;
+            } else {
+                throw new RuntimeException("Could not recognize driver command:" + cmdType);
             }
+
         }
 
         return command;

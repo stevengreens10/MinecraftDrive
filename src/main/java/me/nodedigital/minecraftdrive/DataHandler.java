@@ -44,7 +44,7 @@ public class DataHandler {
     }
 
     private static Block readBlock(PlayerEntity player, int offset) {
-        DriveInitializer.LOGGER.info("Reading block at offset {}", offset);
+        DriveInitializer.LOGGER.debug("Reading block at offset {}", offset);
         World world = player.getWorld();
         navigatePlayerToPos(player, offset);
 
@@ -53,7 +53,7 @@ public class DataHandler {
     }
 
     private static void placeBlock(PlayerEntity player, Block block, int offset) {
-        DriveInitializer.LOGGER.info("Placing {} block at offset {}", block.getName().getString(), offset);
+        DriveInitializer.LOGGER.debug("Placing {} block at offset {}", block.getName().getString(), offset);
         World world = player.getWorld();
         navigatePlayerToPos(player, offset);
         player.equipStack(EquipmentSlot.MAINHAND, new ItemStack(Item.fromBlock(block)));
@@ -79,7 +79,7 @@ public class DataHandler {
 
     private static void navigatePlayerToPos(PlayerEntity player, int offset) {
         Vec3d pos = new Vec3d(offset, player.getY(), 2.5);
-        DriveInitializer.LOGGER.info("Navigating player to ({} {} {})", pos.x,
+        DriveInitializer.LOGGER.debug("Navigating player to ({} {} {})", pos.x,
                 pos.y, pos.z);
 
 
