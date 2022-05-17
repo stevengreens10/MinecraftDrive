@@ -2,7 +2,7 @@
 
 ## What?
 
-This project allows you create a device driver that will store data in a Minecraft world with 1 block corresponding to each byte.
+This project allows you to create a device driver that will store data in a Minecraft world with 1 block corresponding to each byte.
 
 ## How?
 
