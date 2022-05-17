@@ -11,7 +11,7 @@
 
 MODULE_LICENSE("GPL");
 
-#define SOCK_PATH   "/tmp/usocket"
+#define SOCK_PATH   "/home/node/mc.socket"
 #define MAX_DATA 1000
 
 struct socket *sock = NULL;

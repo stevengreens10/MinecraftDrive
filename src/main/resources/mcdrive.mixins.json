@@ -1,12 +1,14 @@
 {
   "required": true,
   "minVersion": "0.8",
-  "package": "net.fabricmc.example.mixin",
+  "package": "me.nodedigital.minecraftdrive.mixin",
   "compatibilityLevel": "JAVA_17",
   "mixins": [
   ],
   "client": [
-    "me.fabricmc.example.mixin.ExampleMixin"
+    "ExampleMixin",
+    "ClientPlayerEntityMixin",
+    "KeyboardInputMixin"
   ],
   "injectors": {
     "defaultRequire": 1
