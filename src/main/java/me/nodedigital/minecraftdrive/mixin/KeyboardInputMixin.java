@@ -23,6 +23,8 @@ public abstract class KeyboardInputMixin {
             KeyboardInput keyThis = ((KeyboardInput)((Object) this));
             keyThis.pressingForward = true;
             keyThis.movementForward = 1.0f;
+            MinecraftClient.getInstance().options.sprintKey.setPressed(true);
+            player.setSprinting(true);
         }
 
     }

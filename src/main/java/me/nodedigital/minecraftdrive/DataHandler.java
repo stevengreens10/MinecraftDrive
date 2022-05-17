@@ -9,11 +9,11 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.network.ServerPlayerInteractionManager;
-import net.minecraft.text.LiteralText;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.GameMode;
 import net.minecraft.world.World;
 
 public class DataHandler {
@@ -44,12 +44,11 @@ public class DataHandler {
     }
 
     private static Block readBlock(PlayerEntity player, int offset) {
-        // TODO: Navigate player to coord according to offset and get block
         DriveInitializer.LOGGER.info("Reading block at offset {}", offset);
         World world = player.getWorld();
         navigatePlayerToPos(player, offset);
 
-        return world.getBlockState(new BlockPos(MinecraftClient.getInstance().crosshairTarget.getPos())).getBlock();
+        return world.getBlockState(getTargetBlockPos(player, offset)).getBlock();
 
     }
 
@@ -63,9 +62,11 @@ public class DataHandler {
         // Check if there is a block at the target position already.
         ServerPlayerInteractionManager playerInteractionManager = player.getServer().getPlayerInteractionManager((ServerPlayerEntity) player);
 
-        if(hitResult.getBlockPos().equals(getTargetBlockPos(player, offset))) {
+        BlockPos targetBlockPos = getTargetBlockPos(player, offset);
+        if(!world.getBlockState(targetBlockPos).isAir()) {
             // Break it
-            playerInteractionManager.tryBreakBlock(hitResult.getBlockPos());
+            playerInteractionManager.changeGameMode(GameMode.CREATIVE);
+            playerInteractionManager.tryBreakBlock(targetBlockPos);
 
             // Get hit result again afterwards
             hitResult = (BlockHitResult) MinecraftClient.getInstance().crosshairTarget;
@@ -77,7 +78,7 @@ public class DataHandler {
 
 
     private static void navigatePlayerToPos(PlayerEntity player, int offset) {
-        Vec3d pos = new Vec3d(offset, player.getY(), 2);
+        Vec3d pos = new Vec3d(offset, player.getY(), 2.5);
         DriveInitializer.LOGGER.info("Navigating player to ({} {} {})", pos.x,
                 pos.y, pos.z);
 
@@ -89,19 +90,19 @@ public class DataHandler {
         playerMixin.setLookAt(pos);
 
         // Wait for player to be at block
-        while (player.getPos().distanceTo(pos) > 2.0f) {
-            player.sendMessage(new LiteralText("" + player.getPos().distanceTo(pos)), false);
+        while (player.getPos().distanceTo(pos) > 0.1f) {
+//            player.sendMessage(new LiteralText("" + player.getPos().distanceTo(pos)), false);
             try {
                 Thread.sleep(50);
             } catch(Exception e){}
         }
 
-        playerMixin.setLookAt(pos.subtract(0, 0, 2));
+        playerMixin.setLookAt(new Vec3d(pos.x + 0.5, pos.y, 0.5));
         playerMixin.setDestination(null);
 
         // Wait for player to be looking at block
         try {
-            Thread.sleep(150);
+            Thread.sleep(100);
         } catch(Exception e){}
 
         playerMixin.setLookAt(null);
