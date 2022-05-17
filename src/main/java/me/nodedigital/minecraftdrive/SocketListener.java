@@ -28,7 +28,7 @@ public class SocketListener implements Runnable {
                         DriverCommand command = getCommand(channel);
 
                         if(command == null) {
-                            continue;
+                            break;
                         }
 
                         DriveInitializer.LOGGER.info("Received {} command at offset {} with len {}", command.type.name(), command.offset, command.len);
@@ -42,7 +42,11 @@ public class SocketListener implements Runnable {
                         }
                     }
 
+                    DriveInitializer.LOGGER.info("Channel closed, accepting new one..");
+
                 }
+
+                DriveInitializer.LOGGER.info("Server channel closed");
             }
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -88,6 +92,7 @@ public class SocketListener implements Runnable {
     }
 
     private byte[] readSocketMessage(SocketChannel channel) throws IOException {
+        DriveInitializer.LOGGER.info("Waiting for data..");
         ByteBuffer buffer = ByteBuffer.allocate(1024);
         int bytesRead = channel.read(buffer);
         if (bytesRead < 0)
